@@ -1,0 +1,191 @@
+<div class="container">
+    <div class="row">
+        <!-- Tabs -->
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    {{ t('Data') }}
+                </div>
+
+                <div class="panel-body">
+                    <div>
+                        <ul class="nav">
+                           <li *ngFor="let tab of tabs">
+                               <a href="#{{tab.key}}" data-toggle="tab" (click)="changeTab(tab)">
+                                   <i class="{{tab.icon}}"></i>&nbsp;{{tab.name}}
+                               </a>
+                           </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Panes -->
+        <div class="col-md-8">
+            <div class="tab-content">
+                <div class="tab-pane fade in active">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            {{ t('Data') }}
+                        </div>
+
+                        <div class="panel-body">
+                            Selecione
+                        </div>
+                    </div>
+                </div>
+                <div *ngFor="let tab of tabs" id="{{ tab.key }}" class="tab-pane fade">
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-6">{{ tab.name }}</div>
+                                <div class="col-xs-6 text-right">
+                                    <button  class="btn btn-primary" data-toggle="modal" data-target="#modal" (click)="openCreateModal(tab)">
+                                        <span class="glyphicon glyphicon-file"></span> {{ t('New') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-body">
+
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <nav *ngIf="pagination.hasOwnProperty('current_page')">
+                                        <ul class="pagination">
+                                            <li *ngIf="pagination.current_page > 1">
+                                                <a href="#" title="{{ t('First') }}" (click)="changePage(tab, 1)">
+                                                    <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+                                                </a>
+                                            </li>
+                                            <li *ngIf="pagination.current_page > 1">
+                                                <a href="#" title="{{ t('Previous') }}" (click)="changePage(tab, pagination.current_page-1)">
+                                                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                                                </a>
+                                            </li>
+
+                                            <li *ngFor="let page of pages" [ngClass]="(page==pagination.current_page)?'active':''">
+                                                <a href="#" title="{{ t('Page') }} {{ page }}" (click)="changePage(tab, page)">
+                                                    {{ page }}
+                                                </a>
+                                            </li>
+
+                                            <li *ngIf="pagination.current_page < pagination.last_page">
+                                                <a href="#" title="{{ t('Next') }}" (click)="nextPage(tab, pagination.current_page)">
+                                                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                                                </a>
+                                            </li>
+                                            <li *ngIf="pagination.current_page < pagination.last_page">
+                                                <a href="#" title="{{ t('Last') }}" (click)="changePage(tab, pagination.last_page)">
+                                                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div *ngFor="let item of data" class="col-xs-12 well well-sm">
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-8 col-md-6">
+                                            <ul>
+                                                <span *ngFor="let column of tab.columns">
+                                                    <li *ngIf="item[column.name]">{{ t(column.displayName) }}: {{ item[column.name] }}</li>
+                                                </span>
+                                            </ul>
+                                        </div>
+
+                                        <div class="col-xs-12 col-sm-4 col-md-6 text-right">
+                                            <button  class="edit-modal btn btn-warning" data-toggle="modal" data-target="#modal" (click)="openEditModal(tab, item)">
+                                                <span class="glyphicon glyphicon-edit"></span> {{ t('Edit') }}
+                                            </button>
+                                            <button  class="edit-modal btn btn-danger" (click)="removeItem(tab, item)">
+                                                <span class="glyphicon glyphicon-trash"></span> {{ t('Remove') }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <nav *ngIf="pagination.hasOwnProperty('current_page')">
+                                        <ul class="pagination">
+                                            <li *ngIf="pagination.current_page > 1">
+                                                <a href="#" title="{{ t('First') }}" (click)="changePage(tab, 1)">
+                                                    <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+                                                </a>
+                                            </li>
+                                            <li *ngIf="pagination.current_page > 1">
+                                                <a href="#" title="{{ t('Previous') }}" (click)="changePage(tab, pagination.current_page-1)">
+                                                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                                                </a>
+                                            </li>
+
+                                            <li *ngFor="let page of pages" [ngClass]="(page==pagination.current_page)?'active':''">
+                                                <a href="#" title="{{ t('Page') }} {{ page }}" (click)="changePage(tab, page)">
+                                                    {{ page }}
+                                                </a>
+                                            </li>
+
+                                            <li *ngIf="pagination.current_page < pagination.last_page">
+                                                <a href="#" title="{{ t('Next') }}" (click)="nextPage(tab, pagination.current_page)">
+                                                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                                                </a>
+                                            </li>
+                                            <li *ngIf="pagination.current_page < pagination.last_page">
+                                                <a href="#" title="{{ t('Last') }}" (click)="changePage(tab, pagination.last_page)">
+                                                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- createModal -->
+<div class="modal fade" id="modal" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">{{ modalTitle }}</h4>
+            </div>
+            <form method="post" enctype="multipart/form-data" role="form">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-xs-12 col-sm-6" *ngFor="let column of modalColumns">
+                            <!--suppress XmlInvalidId -->
+                            <label for="{{ column.name }}">{{ t(column.displayName) }}</label>
+                            <input name="{{ column.name }}" class="form-control"
+                                   type="{{ column.formInputType }}" placeholder="{{ column.formInputPlaceholder }}"
+                                   [(ngModel)]="column.itemModel" />
+                            <!--<span *ngIf="formErrors[column.name]" class="error text-danger">{{ formErrors[column.name] }}</span>-->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" data-dismiss="modal" (click)="saveItem(modalTab)" class="btn btn-success btn-block">
+                        <i class="fa fa-btn fa-save"></i> {{ t('Save') }}
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

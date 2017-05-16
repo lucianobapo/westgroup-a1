@@ -1,0 +1,19 @@
+.splash-footer {
+    border-top: 1px solid #ccc;
+    margin-bottom: 30px;
+    padding-top: 30px;
+}
+.splash-footer-company {
+    color: #aaa;
+    line-height: 45px;
+    vertical-align: middle;
+}
+
+.splash-footer-social-icons {
+    color: #aaa;
+    font-size: 32px;
+}
+a {
+    color: #aaa;
+    text-decoration: none;
+}
