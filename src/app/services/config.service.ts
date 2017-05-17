@@ -10,8 +10,8 @@ export class ConfigService {
     }
 
     get resourceUrl(): string {
-        this._resourceUrl = 'https://westgroup.ilhanet.com';
-        // this._resourceUrl = 'https://westgroup.localhost.com';
+        // this._resourceUrl = 'https://westgroup.ilhanet.com';
+        this._resourceUrl = 'https://westgroup.localhost.com';
         return this._resourceUrl;
     }
 
