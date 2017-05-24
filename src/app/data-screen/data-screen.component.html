@@ -87,7 +87,13 @@
                                 </div>
                             </div>
 
-                            <div class="row">
+                            <div class="row" *ngIf="data.length==0">
+                                <div class="col-xs-12 well well-sm">
+                                    {{ t('No records found') }}
+                                </div>
+                            </div>
+
+                            <div class="row" *ngIf="data.length>0">
                                 <div *ngFor="let item of data" class="col-xs-12 well well-sm">
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-8 col-md-6">
