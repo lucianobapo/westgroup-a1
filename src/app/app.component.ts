@@ -27,3 +27,4 @@ export class AppComponent extends BaseComponent {
             });
     }
 }
+

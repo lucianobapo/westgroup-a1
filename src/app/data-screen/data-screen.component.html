@@ -11,8 +11,8 @@
                     <div>
                         <ul class="nav">
                            <li *ngFor="let tab of tabs">
-                               <a href="#{{tab.key}}" data-toggle="tab" (click)="changeTab(tab)">
-                                   <i class="{{tab.icon}}"></i>&nbsp;{{tab.name}}
+                               <a href="#{{tab.key}}" data-toggle="tab" (click)="changeTab(tab, true)">
+                                   <i class="{{tab.icon}}"></i>&nbsp;{{tab.routeLinkName}}
                                </a>
                            </li>
                         </ul>
@@ -40,7 +40,7 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <div class="row">
-                                <div class="col-xs-6">{{ tab.name }}</div>
+                                <div class="col-xs-6">{{ tab.routeLinkName }}</div>
                                 <div class="col-xs-6 text-right">
                                     <button  class="btn btn-primary" data-toggle="modal" data-target="#modal" (click)="openCreateModal(tab)">
                                         <span class="glyphicon glyphicon-file"></span> {{ t('New') }}
@@ -87,19 +87,19 @@
                                 </div>
                             </div>
 
-                            <div class="row" *ngIf="data.length==0">
+                            <div class="row" *ngIf="!hasData()">
                                 <div class="col-xs-12 well well-sm">
                                     {{ t('No records found') }}
                                 </div>
                             </div>
 
-                            <div class="row" *ngIf="data.length>0">
-                                <div *ngFor="let item of data" class="col-xs-12 well well-sm">
+                            <div class="row" *ngIf="hasData()">
+                                <div *ngFor="let item of getItemsData()" class="col-xs-12 well well-sm">
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-8 col-md-6">
                                             <ul>
-                                                <span *ngFor="let column of tab.columns">
-                                                    <li *ngIf="item[column.name]">{{ t(column.displayName) }}: {{ item[column.name] }}</li>
+                                                <span *ngFor="let column of getTabFields(tab)">
+                                                    <li *ngIf="hasColumn(column, item)">{{ columnDisplayName(column) }}: {{ columnData(column, item) }}</li>
                                                 </span>
                                             </ul>
                                         </div>

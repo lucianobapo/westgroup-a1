@@ -29,29 +29,40 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.dataService.httpGet('config/erpnetSaas')
+        this.dataService.httpGet('config/erpnetMigrates')
             .map(response=>{
                 return response.json().data;
             })
             .subscribe(response=>{
-                Object.keys(response).forEach(item=>{
-                    if(response[item].hasOwnProperty('apiUrl')){
-                        let tab = response[item];
+                if(response.hasOwnProperty('tables')){
+                    Object.keys(response.tables).forEach(item=>{
+                        let tab = response.tables[item];
+                        if(!tab.hasOwnProperty('key')) tab.key = item;
+                        if(!tab.hasOwnProperty('icon')) tab.icon = 'fa fa-fw fa-file';
+                        if(!tab.hasOwnProperty('routeLinkName')) tab.routeLinkName = item.charAt(0).toUpperCase()+item.substr(1);
+                        if(!tab.hasOwnProperty('routePrefix')) tab.routePrefix = item;
                         tab.itemModel = '';
-                        this.tabs.push(tab);
-                    }
-                });
+                        // this.tabs[item] = tab;
+                        if(!tab.hasOwnProperty('tabDisplay')) this.tabs.push(tab);
+                        if(tab.hasOwnProperty('tabDisplay') && tab.tabDisplay) this.tabs.push(tab);
+                        // if(response[item].hasOwnProperty('apiUrl')){
+                        //
+                        // }
+                    });
+                }
+                // console.log(this.tabs);
+
             });
 
 
     }
 
-    changeTab(tab): void {
+    changeTab(tab, resetPage=false): void {
         this.data = [];
         let sufix='';
-        if (this.pagination.hasOwnProperty('current_page')) sufix='?page='+this.pagination['current_page'];
+        if (!resetPage && this.pagination.hasOwnProperty('current_page')) sufix='?page='+this.pagination['current_page'];
         this.pagination = {};
-        this.dataService.httpGet(tab.apiUrl+sufix)
+        this.dataService.httpGet(tab.routePrefix+sufix)
             .map(response=>{
                 return response.json();
             })
@@ -63,7 +74,7 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
     changePage(tab, page): void {
         this.data = [];
         this.pagination = {};
-        this.dataService.httpGet(tab.apiUrl+'?page='+page)
+        this.dataService.httpGet(tab.routePrefix+'?page='+page)
             .map(response=>{
                 return response.json();
             })
@@ -89,7 +100,7 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
         });
         input['mandante'] = this.getConfig('defaultMandante');
 
-        this.dataService.httpPost(tab.apiUrl+sufix, input, method)
+        this.dataService.httpPost(tab.routePrefix+sufix, input, method)
             .map(response=>{
                 return response.json().data;
             })
@@ -102,7 +113,7 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
         let input={};
         let method='delete';
 
-        this.dataService.httpPost(tab.apiUrl+'/'+item.id, input, method)
+        this.dataService.httpPost(tab.routePrefix+'/'+item.id, input, method)
             .map(response=>{
                 return response.json().data;
             })
@@ -115,22 +126,35 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
         this.modalTab = tab;
         this.modalTitle = this.t('Create New Data');
         this.modalColumns = [];
-        Object.keys(tab.columns).forEach(key=>{
-            if (tab.columns[key].name!='id'){
-                this.modalColumns.push(tab.columns[key]);
+        let columns = this.getTabFields(tab);
+        columns.forEach(column=>{
+            if (column!='id'){
+                this.modalColumns.push({
+                    name: column,
+                    displayName: column.charAt(0).toUpperCase()+column.substr(1),
+                    itemModel: '',
+                    formInputType: 'text',
+                });
             }
         });
-        Object.keys(this.modalColumns).forEach(key=>{
-            this.modalColumns[key].itemModel = '';
-        });
+        // Object.keys(this.modalColumns).forEach(key=>{
+        //     this.modalColumns[key].itemModel = '';
+        // });
     }
 
     openEditModal(tab, item){
         this.modalTab = tab;
         this.modalTitle = this.t('Edit Data');
-        this.modalColumns = tab.columns;
-        Object.keys(this.modalColumns).forEach(key=>{
-            this.modalColumns[key].itemModel = item[this.modalColumns[key].name];
+        this.modalColumns = [];
+
+        let columns = this.getTabFields(tab);
+        columns.forEach(column=>{
+            this.modalColumns.push({
+                name: column,
+                displayName: column.charAt(0).toUpperCase()+column.substr(1),
+                itemModel: item[column],
+                formInputType: 'text',
+            });
         });
     }
 
@@ -142,4 +166,57 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
             if (page>0 && page<=pagination.last_page) this.pages.push(page);
         }
     }
+
+    hasColumn(column, item){
+        let aux = this.columnData(column, item);
+        // console.log((aux.constructor == String));
+        return aux && (aux.constructor == String) && aux.length>0;
+    }
+
+    columnData(column, item):string{
+        // console.log(column.constructor);
+        if(column.hasOwnProperty('name')) return item[column.name];
+        return item[column];
+    }
+
+    columnDisplayName(column):string{
+        // console.log(column.constructor);
+        if(column.hasOwnProperty('displayName')) return this.t(column.displayName);
+        return this.t(column.charAt(0).toUpperCase()+column.substr(1));
+    }
+
+    hasData(){
+        return this.data.length>0;
+    }
+
+    getItemsData(){
+        if(!this.hasData()) return [];
+        if(this.data.constructor == Array) return this.data;
+        // console.log(this.data.constructor);
+        // return this.data;
+        return [];
+    }
+
+    getTabFields(tab):any[]{
+        if(tab.hasOwnProperty('fields') && tab.fields.constructor == Array) {
+            // console.log(tab.fields);
+            return tab.fields;
+        }
+        if(tab.hasOwnProperty('fields') && tab.fields.constructor == Object) {
+            // console.log(tab.fields);
+            let fields = [];
+            Object.keys(tab.fields).forEach(item=>{
+                if (tab.fields[item].constructor == String) fields.push(tab.fields[item]);
+                if (tab.fields[item].constructor == Object) fields.push(item);
+                // console.log(tab.fields[item].constructor);
+            });
+            // console.log(fields);
+            return fields;
+        }
+        // console.log(tab.fields);
+        // console.log(this.data.constructor);
+        // return this.data;
+        return [];
+    }
 }
+
