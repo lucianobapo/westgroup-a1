@@ -128,18 +128,9 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
         this.modalColumns = [];
         let columns = this.getTabFields(tab);
         columns.forEach(column=>{
-            if (column!='id'){
-                this.modalColumns.push({
-                    name: column,
-                    displayName: column.charAt(0).toUpperCase()+column.substr(1),
-                    itemModel: '',
-                    formInputType: 'text',
-                });
-            }
+            if(!(column.hasOwnProperty('key') && column.key=='id') && column!='id')
+                this.populateModalColumns(column);
         });
-        // Object.keys(this.modalColumns).forEach(key=>{
-        //     this.modalColumns[key].itemModel = '';
-        // });
     }
 
     openEditModal(tab, item){
@@ -149,12 +140,7 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
 
         let columns = this.getTabFields(tab);
         columns.forEach(column=>{
-            this.modalColumns.push({
-                name: column,
-                displayName: column.charAt(0).toUpperCase()+column.substr(1),
-                itemModel: item[column],
-                formInputType: 'text',
-            });
+            this.populateModalColumns(column, item);
         });
     }
 
@@ -175,14 +161,24 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
 
     columnData(column, item):string{
         // console.log(column.constructor);
-        if(column.hasOwnProperty('name')) return item[column.name];
-        return item[column];
+        if(column.constructor == Object){
+            if(column.hasOwnProperty('key')) return item[column.key];
+        }
+
+        if(column.constructor == String) return item[column];
+        return 'err';
     }
 
     columnDisplayName(column):string{
         // console.log(column.constructor);
-        if(column.hasOwnProperty('displayName')) return this.t(column.displayName);
-        return this.t(column.charAt(0).toUpperCase()+column.substr(1));
+        if(column.constructor == Object){
+            // console.log(column);
+            if(column.hasOwnProperty('displayName')) return this.t(column.displayName);
+            if(column.hasOwnProperty('key')) return this.t(column.key.charAt(0).toUpperCase()+column.key.substr(1));
+        }
+
+        if(column.constructor == String) return this.t(column.charAt(0).toUpperCase()+column.substr(1));
+        return 'err';
     }
 
     hasData(){
@@ -206,9 +202,17 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
             // console.log(tab.fields);
             let fields = [];
             Object.keys(tab.fields).forEach(item=>{
-                if (tab.fields[item].constructor == String) fields.push(tab.fields[item]);
-                if (tab.fields[item].constructor == Object) fields.push(item);
+                if (tab.fields[item].constructor == String) {
+                    let obj = {key: tab.fields[item]};
+                    fields.push(obj);
+                }
+                if (tab.fields[item].constructor == Object) {
+                    let obj = tab.fields[item];
+                    obj.key=item;
+                    fields.push(obj);
+                }
                 // console.log(tab.fields[item].constructor);
+                // fields.push(tab.fields[item]);
             });
             // console.log(fields);
             return fields;
@@ -217,6 +221,37 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
         // console.log(this.data.constructor);
         // return this.data;
         return [];
+    }
+
+    private populateModalColumns(column: any, item=null) {
+        let obj;
+
+        if(column.constructor == String) {
+            obj = {
+                name: column,
+                displayName: column.charAt(0).toUpperCase() + column.substr(1),
+                itemModel: '',
+                formInputType: 'text',
+            };
+            if (item) obj.itemModel = item[column];
+        }
+
+        if(column.constructor == Object){
+            obj = column;
+
+            if(!obj.hasOwnProperty('name')) obj.name = column.key;
+
+            if(!obj.hasOwnProperty('displayName'))
+                obj.displayName = column.key.charAt(0).toUpperCase()+column.key.substr(1);
+
+            if(!obj.hasOwnProperty('formInputType'))
+                obj.formInputType = 'text';
+
+            obj.itemModel = '';
+            if (item) obj.itemModel = item[column.key];
+        }
+
+        this.modalColumns.push(obj);
     }
 }
 

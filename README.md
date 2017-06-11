@@ -1,3 +1,8 @@
+ng build -op docs/ --prod
+git cmt
+rm -r ../westgroup-v1/public/docs/
+cp docs/ ../westgroup-v1/public/docs -r
+
 # MyApp
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.0.3.
