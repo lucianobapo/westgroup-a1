@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {DataService} from "../services/data.service";
 import 'rxjs/add/operator/map';
 import {BaseComponent} from "../base-component";
+import {FormControl, Validators, FormBuilder, FormGroup} from "@angular/forms";
 
 @Component({
     selector: 'app-data-screen',
@@ -17,8 +18,10 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
     public data = [];
     public pagination = {};
     public pages = [];
+    private modalForm: FormGroup;
 
-    constructor(protected dataService: DataService) {
+    constructor(protected dataService: DataService,
+                protected formBuilder: FormBuilder) {
         super();
         this.dataService.getDataEvent.subscribe(data => {
             this.data = data.data;
@@ -26,6 +29,10 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
             this.processPages(this.pagination);
 
         });
+
+        // this.cep = new FormControl('', Validators.required);
+        this.modalForm = this.formBuilder.group({});
+
     }
 
     ngOnInit() {
@@ -131,6 +138,8 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
             if(!(column.hasOwnProperty('key') && column.key=='id') && column!='id')
                 this.populateModalColumns(column);
         });
+        // this.modalForm = this.formBuilder.group({});
+        console.log(this.modalForm);
     }
 
     openEditModal(tab, item){
@@ -142,6 +151,9 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
         columns.forEach(column=>{
             this.populateModalColumns(column, item);
         });
+
+
+        console.log(this.modalForm);
     }
 
     private processPages(pagination: any) {
@@ -234,6 +246,7 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
                 formInputType: 'text',
             };
             if (item) obj.itemModel = item[column];
+            this.modalForm.addControl(column, new FormControl(''));
         }
 
         if(column.constructor == Object){
@@ -249,6 +262,7 @@ export class DataScreenComponent extends BaseComponent implements OnInit {
 
             obj.itemModel = '';
             if (item) obj.itemModel = item[column.key];
+            this.modalForm.addControl(column.key, new FormControl(''));
         }
 
         this.modalColumns.push(obj);

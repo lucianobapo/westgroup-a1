@@ -23,7 +23,7 @@ export class DataService {
     httpPost(resource, body, method='post'){
         let headers = new Headers();
         headers.append('Accept', 'application/x.erpnet.v1+json');
-        headers.append('Content-Type', 'application/json');
+        headers.append('Content-Type', 'multipart/form-data');
         let options = new RequestOptions({headers : headers});
         // this.showLoading();
         // this.connectivityMonitorService.setOnline();
